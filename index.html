@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>O ano inteiro em um só lugar</title>
+
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #e0e7ff;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.06);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-bottom: 70px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #ffffff;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      font-size: 0.8rem;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    main {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .module-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .module-card:active, .module-card.active {
+      transform: scale(0.96);
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .module-card .icon {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+
+    .module-card span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .module-view {
+      display: none;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .module-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .module-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 8px;
+    }
+
+    .form-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+      flex: 1;
+      min-width: 140px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #f8fafc;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+    }
+
+    button.btn-add {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.btn-add:hover {
+      background: var(--primary-dark);
+    }
+
+    .item-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .item-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .item-card.completed {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+
+    .item-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+    }
+
+    .badge-summary {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 1rem;
+      background: var(--primary-light);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+    }
+
+    footer button {
+      background: none;
+      border: none;
+      color: var(--primary);
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      max-width: 550px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .modal-header h2 {
+      font-size: 1.15rem;
+      color: var(--primary-dark);
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .terms-section {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .terms-section h3 {
+      font-size: 0.9rem;
+      color: var(--primary-dark);
+      margin-top: 4px;
+    }
+
+    .terms-section p, .terms-section ul {
+      color: #334155;
+    }
+
+    .terms-section ul {
+      padding-left: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>O ano inteiro em um só lugar</h1>
+    <p>Sua organização pessoal simples, completa e offline</p>
+  </header>
+
+  <main>
+    <div class="modules-grid">
+      <div class="module-card active" onclick="switchModule('tarefas')">
+        <span class="icon">✅</span>
+        <span>Tarefas</span>
+      </div>
+      <div class="module-card" onclick="switchModule('calendario')">
+        <span class="icon">📅</span>
+        <span>Calendário</span>
+      </div>
+      <div class="module-card" onclick="switchModule('financas')">
+        <span class="icon">💰</span>
+        <span>Finanças</span>
+      </div>
+      <div class="module-card" onclick="switchModule('metas')">
+        <span class="icon">🎯</span>
+        <span>Metas</span>
+      </div>
+      <div class="module-card" onclick="switchModule('habitos')">
+        <span class="icon">📊</span>
+        <span>Hábitos</span>
+      </div>
+      <div class="module-card" onclick="switchModule('saude')">
+        <span class="icon">❤️</span>
+        <span>Saúde</span>
+      </div>
+      <div class="module-card" onclick="switchModule('compras')">
+        <span class="icon">🛒</span>
+        <span>Compras</span>
+      </div>
+      <div class="module-card" onclick="switchModule('refeicoes')">
+        <span class="icon">🍽️</span>
+        <span>Refeições</span>
+      </div>
+      <div class="module-card" onclick="switchModule('anotacoes')">
+        <span class="icon">📝</span>
+        <span>Anotações</span>
+      </div>
+      <div class="module-card" onclick="switchModule('estudos')">
+        <span class="icon">🎓</span>
+        <span>Estudos</span>
+      </div>
+    </div>
+
+    <!-- Tarefas -->
+    <section id="mod-tarefas" class="module-view active">
+      <div class="module-title"><span>✅</span> Tarefas Diárias</div>
+      <div class="form-group">
+        <input type="text" id="input-tarefa" placeholder="Nova tarefa...">
+        <button class="btn-add" onclick="addTarefa()">Adicionar</button>
+      </div>
+      <ul id="list-tarefas" class="item-list"></ul>
+    </section>
+
+    <!-- Calendário -->
+    <section id="mod-calendario" class="module-view">
+      <div class="module-title"><span>📅</span> Compromissos</div>
+      <div class="form-group">
+        <input type="date" id="input-cal-data">
+        <input type="text" id="input-cal-desc" placeholder="Descrição do compromisso...">
+        <button class="btn-add" onclick="addCalendario()">Agendar</button>
+      </div>
+      <ul id="list-calendario" class="item-list"></ul>
+    </section>
+
+    <!-- Finanças -->
+    <section id="mod-financas" class="module-view">
+      <div class="module-title"><span>💰</span> Controle Financeiro</div>
+      <div class="badge-summary">
+        <span>Receitas: R$ <span id="fin-receita">0.00</span></span>
+        <span>Despesas: R$ <span id="fin-despesa">0.00</span></span>
+      </div>
+      <div class="form-group">
+        <select id="select-fin-tipo">
+          <option value="receita">Receita (+)</option>
+          <option value="despesa">Despesa (-)</option>
+        </select>
+        <input type="text" id="input-fin-desc" placeholder="Descrição (ex: Salário, Mercado)">
+        <input type="number" id="input-fin-valor" placeholder="Valor R$" step="0.01">
+        <button class="btn-add" onclick="addFinanca()">Lançar</button>
+      </div>
+      <ul id="list-financas" class="item-list"></ul>
+    </section>
+
+    <!-- Metas -->
+    <section id="mod-metas" class="module-view">
+      <div class="module-title"><span>🎯</span> Metas do Ano</div>
+      <div class="form-group">
+        <input type="text" id="input-meta" placeholder="Sua meta para este ano...">
+        <button class="btn-add" onclick="addMeta()">Salvar</button>
+      </div>
+      <ul id="list-metas" class="item-list"></ul>
+    </section>
+
+    <!-- Hábitos -->
+    <section id="mod-habitos" class="module-view">
+      <div class="module-title"><span>📊</span> Rastreador de Hábitos</div>
+      <div class="form-group">
+        <input type="text" id="input-habito" placeholder="Novo hábito...">
+        <button class="btn-add" onclick="addHabito()">Criar</button>
+      </div>
+      <ul id="list-habitos" class="item-list"></ul>
+    </section>
+
+    <!-- Saúde -->
+    <section id="mod-saude" class="module-view">
+      <div class="module-title"><span>❤️</span> Saúde e Autocuidado</div>
+      <div class="form-group">
+        <input type="text" id="input-saude" placeholder="Medicamento, atividade física...">
+        <button class="btn-add" onclick="addSaude()">Registrar</button>
+      </div>
+      <ul id="list-saude" class="item-list"></ul>
+    </section>
+
+    <!-- Compras -->
+    <section id="mod-compras" class="module-view">
+      <div class="module-title"><span>🛒</span> Lista de Compras</div>
+      <div class="form-group">
+        <input type="text" id="input-compra" placeholder="Item para comprar...">
+        <button class="btn-add" onclick="addCompra()">Adicionar</button>
+      </div>
+      <ul id="list-compras" class="item-list"></ul>
+    </section>
+
+    <!-- Refeições -->
+    <section id="mod-refeicoes" class="module-view">
+      <div class="module-title"><span>🍽️</span> Planejamento de Refeições</div>
+      <div class="form-group">
+        <select id="select-ref-dia">
+          <option>Segunda-feira</option>
+          <option>Terça-feira</option>
+          <option>Quarta-feira</option>
+          <option>Quinta-feira</option>
+          <option>Sexta-feira</option>
+          <option>Sábado</option>
+          <option>Domingo</option>
+        </select>
+        <input type="text" id="input-refeicao" placeholder="Cardápio ou refeição...">
+        <button class="btn-add" onclick="addRefeicao()">Salvar</button>
+      </div>
+      <ul id="list-refeicoes" class="item-list"></ul>
+    </section>
+
+    <!-- Anotações -->
+    <section id="mod-anotacoes" class="module-view">
+      <div class="module-title"><span>📝</span> Bloco de Notas</div>
+      <div class="form-group" style="flex-direction: column;">
+        <textarea id="input-anotacao" rows="4" placeholder="Escreva suas anotações aqui..."></textarea>
+        <button class="btn-add" onclick="saveAnotacao()" style="align-self: flex-end;">Salvar Nota</button>
+      </div>
+      <div id="status-anotacao" style="font-size: 0.8rem; color: #10b981;"></div>
+    </section>
+
+    <!-- Estudos -->
+    <section id="mod-estudos" class="module-view">
+      <div class="module-title"><span>🎓</span> Plano de Estudos</div>
+      <div class="form-group">
+        <input type="text" id="input-estudo-materia" placeholder="Matéria/Curso">
+        <input type="text" id="input-estudo-topico" placeholder="Tópico a estudar">
+        <button class="btn-add" onclick="addEstudo()">Adicionar</button>
+      </div>
+      <ul id="list-estudos" class="item-list"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>© O ano inteiro em um só lugar • <button onclick="toggleModal(true)">Termos de Privacidade e Uso</button></p>
+  </footer>
+
+  <!-- Modal -->
+  <div id="modal-privacidade" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Termos de Privacidade e Uso</h2>
+        <button class="btn-close" onclick="toggleModal(false)">✖</button>
+      </div>
+      <div class="terms-section">
+        <h3>1. Propriedade Intelectual e Proibição de Cópia</h3>
+        <p>
+          Este aplicativo, seu código-fonte, design, estrutura de navegação, layout visual e textos são de propriedade exclusiva da <strong>Carla Miter Tech</strong>. É estritamente proibida a cópia, reprodução, redistribuição, engenharia reversa, modificação ou comercialização total ou parcial desta aplicação sem autorização prévia e expressa por escrito.
+        </p>
+
+        <h3>2. Privacidade e Armazenamento Local</h3>
+        <p>
+          Respeitamos a sua privacidade. 100% dos dados inseridos no aplicativo (tarefas, finanças, hábitos, anotações e compromissos) são armazenados localmente no navegador do seu dispositivo por meio da tecnologia <code>localStorage</code>. Nenhum dado pessoal ou financeiro é enviado, transmitido ou coletado por servidores externos. O aplicativo funciona de forma totalmente autônoma e offline.
+        </p>
+
+        <h3>3. Responsabilidade do Usuário</h3>
+        <p>
+          Como os dados ficam armazenados exclusivamente no seu dispositivo, a manutenção, backup e limpeza do histórico do navegador são de responsabilidade do próprio usuário. A perda de dados decorrente da limpeza de cache ou formatação do aparelho não é de responsabilidade da desenvolvedora.
+        </p>
+
+        <h3>4. Uso Licenciado</h3>
+        <p>
+          É concedida ao usuário uma licença de uso pessoal, individual e não transferível para organização cotidiana. Esta licença não concede direitos de propriedade sobre a ferramenta.
+        </p>
+
+        <hr style="margin: 4px 0; border: none; border-top: 1px solid var(--border);">
+
+        <p><strong>Desenvolvido por:</strong> Carla Miter Tech</p>
+        <p><strong>Contato & Suporte:</strong> <a href="mailto:sistemacmtech@gmail.com" style="color: var(--primary);">sistemacmtech@gmail.com</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const store = {
+      get: (key, fallback) => JSON.parse(localStorage.getItem(key)) || fallback,
+      set: (key, val) => localStorage.setItem(key, JSON.stringify(val))
+    };
+
+    function switchModule(modId) {
+      document.querySelectorAll('.module-card').forEach((card) => {
+        card.classList.toggle('active', card.getAttribute('onclick').includes(modId));
+      });
+      document.querySelectorAll('.module-view').forEach(view => {
+        view.classList.remove('active');
+      });
+      document.getElementById('mod-' + modId).classList.add('active');
+    }
+
+    function toggleModal(show) {
+      document.getElementById('modal-privacidade').classList.toggle('open', show);
+    }
+
+    // Tarefas
+    let tarefas = store.get('app_tarefas', []);
+    function renderTarefas() {
+      document.getElementById('list-tarefas').innerHTML = tarefas.map((t, i) => `
+        <li class="item-card ${t.done ? 'completed' : ''}">
+          <div class="item-info">
+            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTarefa(${i})">
+            <span>${t.text}</span>
+          </div>
+          <button class="btn-delete" onclick="deleteTarefa(${i})">🗑️</button>
+        </li>
+      `).join('');
+    }
+    function addTarefa() {
+      const inp = document.getElementById('input-tarefa');
+      if (!inp.value.trim()) return;
+      tarefas.push({ text: inp.value.trim(), done: false });
+      store.set('app_tarefas', tarefas);
+      inp.value = '';
+      renderTarefas();
+    }
+    function toggleTarefa(i) {
+      tarefas[i].done = !tarefas[i].done;
+      store.set('app_tarefas', tarefas);
+      renderTarefas();
+    }
+    function deleteTarefa(i) {
+      tarefas.splice(i, 1);
+      store.set('app_tarefas', tarefas);
+      renderTarefas();
+    }
+
+    // Calendário
+    let calendario = store.get('app_calendario', []);
+    function renderCalendario() {
+      document.getElementById('list-calendario').innerHTML = calendario.map((c, i) => `
+        <li class="item-card">
+          <div class="item-info">
+            <strong>${c.data || 'Sem data'}:</strong> <span>${c.desc}</span>
+          </div>
+          <button class="btn-delete" onclick="deleteCalendario(${i})">🗑️</button>
+        </li>
+      `).join('');
+    }
+    function addCalendario() {
+      const dt = document.getElementById('input-cal-data').value;
+      const desc = document.getElementById('input-cal-desc').value;
+      if (!desc.trim()) return;
+      calendario.push({ data: dt, desc: desc.trim() });
+      store.set('app_calendario', calendario);
+      document.getElementById('input-cal-desc').value = '';
+      renderCalendario();
+    }
+    function deleteCalendario(i) {
+      calendario.splice(i, 1);
+      store.set('app_calendario', calendario);
+      renderCalendario();
+    }
+
+    // Finanças
+    let financas = store.get('app_financas', []);
+    function renderFinancas() {
+      let rec = 0, desp = 0;
+      document.getElementById('list-financas').innerHTML = financas.map((f, i) => {
+        if (f.tipo === 'receita') rec += f.valor; else desp += f.valor;
+        return `
+          <li class="item-card">
+            <div class="item-info">
+              <span style="color:${f.tipo === 'receita' ? '#10b981' : '#ef4444'}; font-weight:bold;">
+                ${f.tipo === 'receita' ? '+' : '-'} R$ ${f.valor.toFixed(2)}
+              </span>
+              <span>${f.desc}</span>
+            </div>
+            <button class="btn-delete" onclick="deleteFinanca(${i})">🗑️</button>
+          </li>
+        `;
+      }).join('');
+      document.getElementById('fin-receita').innerText = rec.toFixed(2);
+      document.getElementById('fin-despesa').innerText = desp.toFixed(2);
+    }
+    function addFinanca() {
+      const tipo = document.getElementById('select-fin-tipo').value;
+      const desc = document.getElementById('input-fin-desc').value;
+      const val = parseFloat(document.getElementById('input-fin-valor').value);
+      if (!desc.trim() || isNaN(val)) return;
+      financas.push({ tipo, desc: desc.trim(), valor: val });
+      store.set('app_financas', financas);
+      document.getElementById('input-fin-desc').value = '';
+      document.getElementById('input-fin-valor').value = '';
+      renderFinancas();
+    }
+    function deleteFinanca(i) {
+      financas.splice(i, 1);
+      store.set('app_financas', financas);
+      renderFinancas();
+    }
+
+    // Metas
+    let metas = store.get('app_metas', []);
+    function renderMetas() {
+      document.getElementById('list-metas').innerHTML = metas.map((m, i) => `
+        <li class="item-card ${m.done ? 'completed' : ''}">
+          <div class="item-info">
+            <input type="checkbox" ${m.done ? 'checked' : ''} onchange="toggleMeta(${i})">
+            <span>${m.text}</span>
+          </div>
+          <button class="btn-delete" onclick="deleteMeta(${i})">🗑️</button>
+        </li>
+      `).join('');
+    }
+    function addMeta() {
+      const inp = document.getElementById('input-meta');
+      if (!inp.value.trim()) return;
+      metas.push({ text: inp.value.trim(), done: false });
+      store.set('app_metas', metas);
+      inp.value = '';
+      renderMetas();
+    }
+    function toggleMeta(i) {
+      metas[i].done = !metas[i].done;
+      store.set('app_metas', metas);
+      renderMetas();
+    }
+    function deleteMeta(i) {
+      metas.splice(i, 1);
+      store.set('app_metas', metas);
+      renderMetas();
+    }
+
+    // Hábitos
+    let habitos = store.get('app_habitos', []);
+    function renderHabitos() {
+      document.getElementById('list-habitos').innerHTML = habitos.map((h, i) => `
+        <li class="item-card">
+          <div class="item-info">
+            <span>${h.text}</span>
+            <span style="font-size:0.8rem; background:#e0e7ff; color:#4f46e5; padding:2px 8px; border-radius:12px;">
+              🔥 ${h.count || 0} dias
+            </span>
+          </div>
+          <button style="border:none; background:#6366f1; color:white; padding:4px 8px; border-radius:6px; cursor:pointer;" onclick="checkHabito(${i})">+1</button>
+          <button class="btn-delete" onclick="deleteHabito(${i})">🗑️</button>
+        </li>
+      `).join('');
+    }
+    function addHabito() {
+      const inp = document.getElementById('input-habito');
+      if (!inp.value.trim()) return;
+      habitos.push({ text: inp.value.trim(), count: 0 });
+      store.set('app_habitos', habitos);
+      inp.value = '';
+      renderHabitos();
+    }
+    function checkHabito(i) {
+      habitos[i].count = (habitos[i].count || 0) + 1;
+      store.set('app_habitos', habitos);
+      renderHabitos();
+    }
+    function deleteHabito(i) {
+      habitos.splice(i, 1);
+      store.set('app_habitos', habitos);
+      renderHabitos();
+    }
+
+    // Saúde
+    let saude = store.get('app_saude', []);
+    function renderSaude() {
+      document.getElementById('list-saude').innerHTML = saude.map((s, i) => `
+        <li class="item-card">
+          <div class="item-info"><span>${s.text}</span></div>
+          <button class="btn-delete" onclick="deleteSaude(${i})">🗑️</button>
+        </li>
+      `).join('');
+    }
+    function addSaude() {
+      const inp = document.getElementById('input-saude');
+      if (!inp.value.trim()) return;
+      saude.push({ text: inp.value.trim() });
+      store.set('app_saude', saude);
+      inp.value = '';
+      renderSaude();
+    }
+    function deleteSaude(i) {
+      saude.splice(i, 1);
+      store.set('app_saude', saude);
+      renderSaude();
+    }
+
+    // Compras
+    let compras = store.get('app_compras', []);
+    function renderCompras() {
+      document.getElementById('list-compras').innerHTML = compras.map((c, i) => `
+        <li class="item-card ${c.done ? 'completed' : ''}">
+          <div class="item-info">
+            <input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleCompra(${i})">
+            <span>${c.text}</span>
+          </div>
+          <button class="btn-delete" onclick="deleteCompra(${i})">🗑️</button>
+        </li>
+      `).join('');
+    }
+    function addCompra() {
+      const inp = document.getElementById('input-compra');
+      if (!inp.value.trim()) return;
+      compras.push({ text: inp.value.trim(), done: false });
+      store.set('app_compras', compras);
+      inp.value = '';
+      renderCompras();
+    }
+    function toggleCompra(i) {
+      compras[i].done = !compras[i].done;
+      store.set('app_compras', compras);
+      renderCompras();
+    }
+    function deleteCompra(i) {
+      compras.splice(i, 1);
+      store.set('app_compras', compras);
+      renderCompras();
+    }
+
+    // Refeições
+    let refeicoes = store.get('app_refeicoes', []);
+    function renderRefeicoes() {
+      document.getElementById('list-refeicoes').innerHTML = refeicoes.map((r, i) => `
+        <li class="item-card">
+          <div class="item-info">
+            <strong>${r.dia}:</strong> <span>${r.menu}</span>
+          </div>
+          <button class="btn-delete" onclick="deleteRefeicao(${i})">🗑️</button>
+        </li>
+      `).join('');
+    }
+    function addRefeicao() {
+      const dia = document.getElementById('select-ref-dia').value;
+      const menu = document.getElementById('input-refeicao').value;
+      if (!menu.trim()) return;
+      refeicoes.push({ dia, menu: menu.trim() });
+      store.set('app_refeicoes', refeicoes);
+      document.getElementById('input-refeicao').value = '';
+      renderRefeicoes();
+    }
+    function deleteRefeicao(i) {
+      refeicoes.splice(i, 1);
+      store.set('app_refeicoes', refeicoes);
+      renderRefeicoes();
+    }
+
+    // Anotações
+    function loadAnotacao() {
+      document.getElementById('input-anotacao').value = store.get('app_anotacao', '');
+    }
+    function saveAnotacao() {
+      const val = document.getElementById('input-anotacao').value;
+      store.set('app_anotacao', val);
+      const st = document.getElementById('status-anotacao');
+      st.innerText = 'Salvo com sucesso!';
+      setTimeout(() => st.innerText = '', 2000);
+    }
+
+    // Estudos
+    let estudos = store.get('app_estudos', []);
+    function renderEstudos() {
+      document.getElementById('list-estudos').innerHTML = estudos.map((e, i) => `
+        <li class="item-card ${e.done ? 'completed' : ''}">
+          <div class="item-info">
+            <input type="checkbox" ${e.done ? 'checked' : ''} onchange="toggleEstudo(${i})">
+            <div>
+              <strong>${e.materia}</strong> - <span>${e.topico}</span>
+            </div>
+          </div>
+          <button class="btn-delete" onclick="deleteEstudo(${i})">🗑️</button>
+        </li>
+      `).join('');
+    }
+    function addEstudo() {
+      const mat = document.getElementById('input-estudo-materia').value;
+      const top = document.getElementById('input-estudo-topico').value;
+      if (!mat.trim() || !top.trim()) return;
+      estudos.push({ materia: mat.trim(), topico: top.trim(), done: false });
+      store.set('app_estudos', estudos);
+      document.getElementById('input-estudo-materia').value = '';
+      document.getElementById('input-estudo-topico').value = '';
+      renderEstudos();
+    }
+    function toggleEstudo(i) {
+      estudos[i].done = !estudos[i].done;
+      store.set('app_estudos', estudos);
+      renderEstudos();
+    }
+    function deleteEstudo(i) {
+      estudos.splice(i, 1);
+      store.set('app_estudos', estudos);
+      renderEstudos();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTarefas();
+      renderCalendario();
+      renderFinancas();
+      renderMetas();
+      renderHabitos();
+      renderSaude();
+      renderCompras();
+      renderRefeicoes();
+      loadAnotacao();
+      renderEstudos();
+    });
+  </script>
+</body>
+</html>
